@@ -475,7 +475,13 @@ class OrtValueTensor extends OrtValue {
           return _getNumList(_ptr).reshape<int>(_info._tensorShape);
         case ONNXTensorElementDataType.float:
         case ONNXTensorElementDataType.double:
-          return _getNumList(_ptr).reshape<double>(_info._tensorShape);
+          List<num> output = _getNumList(_ptr);
+          final dim2 = _info._tensorShape[2];
+          if (dim2 != 512 && _info._tensorShape.length == 3) {
+            return output.reshapeDouble(_info._tensorShape);
+          }
+          return output.reshape<double>(_info._tensorShape);
+
         case ONNXTensorElementDataType.bool:
           return _getBoolList(_ptr).reshape<bool>(_info._tensorShape);
         case ONNXTensorElementDataType.string:
@@ -833,7 +839,7 @@ enum ONNXTensorElementDataType {
       case bg.ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_COMPLEX64:
         return ONNXTensorElementDataType.complex64;
       case bg
-            .ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_COMPLEX128:
+          .ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_COMPLEX128:
         return ONNXTensorElementDataType.complex128;
       case bg.ONNXTensorElementDataType.ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16:
         return ONNXTensorElementDataType.bFloat16;
