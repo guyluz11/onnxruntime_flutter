@@ -10,7 +10,8 @@ extension ListShape on List {
   ///
   /// Throws [ArgumentError] if number of elements for [shape]
   /// mismatch with current number of elements in list
-  List reshape<T>(List<int> shape) {
+  List reshape<T>(List<int> shape,
+      {bool getOnlyLastElementOfFirstList = false}) {
     var dims = shape.length;
     // var numElements = 1;
     // for (var i = 0; i < dims; i++) {
@@ -22,7 +23,8 @@ extension ListShape on List {
         case 2:
           return _reshape2<T>(shape);
         case 3:
-          return _reshape3<T>(shape);
+          return _reshape3<T>(shape,
+              getOnlyLastElementOfFirstList: getOnlyLastElementOfFirstList);
         case 4:
           return _reshape4<T>(shape);
         case 5:
@@ -45,9 +47,6 @@ extension ListShape on List {
     return reshapedList;
   }
 
-  List<double> reshapeDouble<double>(List<int> shape) =>
-      _reshapeAndArgmax(shape);
-
   List<List<T>> _reshape2<T>(List<int> shape) {
     var flatList = flatten<T>();
     List<List<T>> reshapedList = List.generate(
@@ -61,19 +60,24 @@ extension ListShape on List {
     return reshapedList;
   }
 
-  List<List<List<T>>> _reshape3<T>(List<int> shape) {
+  List<List<List<T>>> _reshape3<T>(List<int> shape,
+      {bool getOnlyLastElementOfFirstList = false}) {
     if (shape.length != 3) {
       throw ArgumentError(
           "Shape must have exactly three dimensions for _reshape3.");
     }
 
-    final dim2 = shape[2];
-    // if (dim2 == 512) {
     final flatList = flatten<T>();
     final dim0 = shape[0];
     final dim1 = shape[1];
-    // DO x
-    print('Do x 512');
+    final dim2 = shape[2];
+
+    if (getOnlyLastElementOfFirstList) {
+      // Directly access the last element of the first list
+      return [
+        [flatList.sublist(dim0 * dim1 * dim2 - dim2, dim0 * dim1 * dim2)]
+      ];
+    }
 
     if (flatList.length != dim0 * dim1 * dim2) {
       throw ArgumentError(
@@ -93,32 +97,6 @@ extension ListShape on List {
     // return [
     //   [_reshapeAndArgmax(shape)]
     // ];
-  }
-
-  // Optimized version combining _npArgmax and reshape3
-  List<double> _reshapeAndArgmax<double>(List<int> shape) {
-    if (shape.length != 3) {
-      throw ArgumentError(
-          "Shape must have exactly three dimensions for _reshapeAndArgmax.");
-    }
-
-    final flatList = flatten<double>();
-    final dim0 = shape[0];
-    final dim1 = shape[1];
-    final dim2 = shape[2];
-
-    // Check if the size of the flat list matches the shape
-    if (flatList.length != dim0 * dim1 * dim2) {
-      throw ArgumentError(
-          "The size of the flat list does not match the provided shape.");
-    }
-
-    // Directly access the last element of the first list
-    final List<double> lastElementOfFirstList =
-        flatList.sublist(dim0 * dim1 * dim2 - dim2, dim0 * dim1 * dim2);
-
-    // Return the result as a List containing the index
-    return lastElementOfFirstList;
   }
 
   List<List<List<List<T>>>> _reshape4<T>(List<int> shape) {

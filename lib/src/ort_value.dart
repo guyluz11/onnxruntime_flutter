@@ -15,7 +15,8 @@ abstract class OrtValue {
 
   int get address => _ptr.address;
 
-  Object? get value;
+  /// getOnlyLastElementOfFirstList is used for efficient processing of summery
+  Object? getValue({bool getOnlyLastElementOfFirstList = false});
 
   Map<OrtTensorTypeAndShapeInfo, OrtTensorTypeAndShapeInfo> _createMapInfo(
       ffi.Pointer<bg.OrtValue> ortValuePtr) {
@@ -439,7 +440,7 @@ class OrtValueTensor extends OrtValue {
   }
 
   @override
-  dynamic get value {
+  dynamic getValue({bool getOnlyLastElementOfFirstList = false}) {
     if (_info._dimensionsCount == 0) {
       // scalar tensor
       switch (_info._tensorElementType) {
@@ -475,13 +476,8 @@ class OrtValueTensor extends OrtValue {
           return _getNumList(_ptr).reshape<int>(_info._tensorShape);
         case ONNXTensorElementDataType.float:
         case ONNXTensorElementDataType.double:
-          List<num> output = _getNumList(_ptr);
-          final dim2 = _info._tensorShape[2];
-          if (dim2 != 512 && _info._tensorShape.length == 3) {
-            return output.reshapeDouble(_info._tensorShape);
-          }
-          return output.reshape<double>(_info._tensorShape);
-
+          return _getNumList(_ptr).reshape<double>(_info._tensorShape,
+              getOnlyLastElementOfFirstList: getOnlyLastElementOfFirstList);
         case ONNXTensorElementDataType.bool:
           return _getBoolList(_ptr).reshape<bool>(_info._tensorShape);
         case ONNXTensorElementDataType.string:
@@ -548,7 +544,7 @@ class OrtValueSequence extends OrtValue {
   }
 
   @override
-  List<OrtValue>? get value {
+  List<OrtValue>? getValue({bool getOnlyLastElementOfFirstList = false}) {
     if (_onnxType == ONNXType.map) {
       final maps = <OrtValueMap>[];
       for (int i = 0; i < _valueCount; ++i) {
@@ -598,7 +594,7 @@ class OrtValueMap extends OrtValue {
   }
 
   @override
-  Map get value {
+  Map getValue({bool getOnlyLastElementOfFirstList = false}) {
     final keys = _getMapKeys();
     final values = _getMapValues();
     final map = {};
@@ -679,7 +675,7 @@ class OrtValueSparseTensor extends OrtValue {
 
   @override
   // ignore: body_might_complete_normally_nullable
-  Object? get value {
+  Object? getValue({bool getOnlyLastElementOfFirstList = false}) {
     switch (_ortSparseFormat) {
       case OrtSparseFormat.coo:
         // TODO: Handle this case.
