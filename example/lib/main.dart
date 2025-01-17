@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:onnxruntime/onnxruntime.dart';
+
 import 'model_type_test.dart';
 import 'vad_iterator.dart';
 
@@ -88,22 +89,22 @@ class _MyAppState extends State<MyApp> {
     final startTime = DateTime.now().millisecondsSinceEpoch;
     List<OrtValue?>? outputs;
     outputs = await ModelTypeTest.testBool();
-    print('out=${outputs[0]?.value}');
+    print('out=${outputs[0]?.getValue()}');
     outputs.forEach((element) {
       element?.release();
     });
     outputs = await ModelTypeTest.testFloat();
-    print('out=${outputs[0]?.value}');
+    print('out=${outputs[0]?.getValue}');
     outputs.forEach((element) {
       element?.release();
     });
     outputs = await ModelTypeTest.testInt64();
-    print('out=${outputs[0]?.value}');
+    print('out=${outputs[0]?.getValue}');
     outputs.forEach((element) {
       element?.release();
     });
     outputs = await ModelTypeTest.testString();
-    print('out=${outputs[0]?.value}');
+    print('out=${outputs[0]?.getValue}');
     outputs.forEach((element) {
       element?.release();
     });
